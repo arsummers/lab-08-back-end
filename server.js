@@ -110,6 +110,6 @@ function searchMeetup(request, response) {
 function Meetup(data){
   this.link = data.link;
   this.name = data.name;
-  this.creation_date = data.created;
+  this.creation_date = new Date(data.created).toString().slice(0, 15);
   this.host = data.group.name;
 }

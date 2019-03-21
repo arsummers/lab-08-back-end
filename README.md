@@ -62,6 +62,6 @@ Estimate of time needed to complete: 30 min
 Start time: 9:31
 Driver: Aliya, Navigator: Merry
 
-Finish time: 
+Finish time: 11:38
 
-Actual time needed to complete: 
+Actual time needed to complete: 2:00
