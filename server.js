@@ -52,7 +52,7 @@ app.get('/testing', (request, response) =>{
 function searchToLatLong(request, response){
   let query = request.query.data;
 
-  let sql = `SELECT * FROM locations WHERE search_qeuery=$1;`
+  let sql = `SELECT * FROM locations WHERE search_query=$1;`
   let values = [query];
 
   client.query(sql, values)
@@ -76,8 +76,9 @@ function searchToLatLong(request, response){
               let newSql = `INSERT INTO locations (search_query, formatted_query, latitude, longitude) VALUES($1, $2, $3, $4) RETURNING id;`;
 
               let newValues = Object.values(location);
+              console.log('💀line', newValues);
               client.query(newSql, newValues)
-
+              
                 .then( result => {
                   location.id = result.rows[0].id; 
 
@@ -92,6 +93,7 @@ function searchToLatLong(request, response){
 
 //constructor for location. Takes in query and location, accesses it inside the google maps data object and pulls out info
 function Location(query, location) {
+  console.log('👿 line 96', query);
   this.search_query = query;
   this.formatted_query = location.formatted_address;
   this.latitude = location.geometry.location.lat;
