@@ -65,3 +65,24 @@ Driver: Aliya, Navigator: Merry
 Finish time: 11:38
 
 Actual time needed to complete: 2:00
+
+#Number and name of feature: Feature 2 - adapt server JS to handle SEQL responses
+Estimate of time needed to complete: 45min
+
+Start time: 11:51
+Driver: Merry, Navigator: Aliya
+
+Finish time: got weather and maps done by 1240: pause clock: 
+
+Actual time needed to complete: 
+
+#Number and name of feature: Feature 3 - seql file
+Estimate of time needed to complete: 45min
+
+Start time: 12:47
+Driver: Merry, Navigator: Aliya
+
+Finish time: 12:56
+
+Actual time needed to complete: 9 mins 
+

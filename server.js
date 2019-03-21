@@ -9,12 +9,19 @@ const superagent = require('superagent');
 //package dependencies
 const express = require('express');
 const cors = require('cors');
-//const pg = require('pg');
+const pg = require('pg');
 
 //app setup
 const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(cors());
+
+//connection to the client
+const client= new pg.Client(process.env.DATABASE_URL);
+client.connect();
+client.on('error', err => console.error(err));
+//to error is human, to err is machine
+
 
 //API routes will go here
 //location API route
@@ -29,7 +36,7 @@ app.listen(PORT, () =>console.log(`listening on PORT ${PORT}`));
 //error handler - it is called and attached to the function for each route
 function handleError(err, res) {
   console.error(err);
-  if (res) res.status(500).send('Sorry, something has gone very wrong and you should turn back');
+  if (res) res.status(500).send('⚠︎ So terriably sorry, something has gone very wrong and you should turn back. Now. ⚠');
 }
 
 //TEST ROUTE - makes sure server is up
@@ -42,21 +49,51 @@ app.get('/testing', (request, response) =>{
 
 //Helper functions
 
-//for the rendered google maps
-function searchToLatLong(request, response) {
-  //Takes the google maps api link, replaces the query data with the user input, and the key with the geocode API variable
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${request.query.data}&key=${process.env.GEOCODE_API_KEY}`
-  //uses superagent to asynchronyously access the URL while performing the other related maps functions
-  return superagent.get(url)
+function searchToLatLong(request, response){
+  let query = request.query.data;
+
+  let sql = `SELECT * FROM locations WHERE search_query=$1;`
+  let values = [query];
+
+  client.query(sql, values)
     .then(result => {
-      response.send(new Location(request.query.data, result.body.results[0]))
+      if (result.rowCount > 0){
+        console.log('👹LOCATION FROM SQL');
+        response.send(result.rows[0]);
+
+      }else{
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${request.query.data}&key=${process.env.GEOCODE_API_KEY}`;
+
+        superagent.get(url)
+
+          .then(data =>{
+            console.log('💩LOCATION FROM API');
+
+            if(!data.body.results.length){throw 'NO DATA'}
+
+            else{
+              let location = new Location( query, data.body.results[0]);
+              let newSql = `INSERT INTO locations (search_query, formatted_query, latitude, longitude) VALUES($1, $2, $3, $4) RETURNING id;`;
+
+              let newValues = Object.values(location);
+              console.log('💀line', newValues);
+              client.query(newSql, newValues)
+              
+                .then( result => {
+                  location.id = result.rows[0].id; 
+
+                  response.send(location);
+                })
+            }
+          })
+          .catch(error => handleError(error, response));
+      }
     })
-    .catch(error => handleError(error, response));
 }
 
 //constructor for location. Takes in query and location, accesses it inside the google maps data object and pulls out info
 function Location(query, location) {
-  //console.log({location});
+  console.log('👿 line 96', query);
   this.search_query = query;
   this.formatted_query = location.formatted_address;
   this.latitude = location.geometry.location.lat;
@@ -64,19 +101,43 @@ function Location(query, location) {
 }
 
 //Refactoring weather to use array.maps. Callback function for the /weather path
+//and SQL
 
-function searchWeather(request, response) {
-  //gets url for API key and feeds into superagent
-  const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`
-  return superagent.get(url)
-  // asynchronous call that renders weather results while superagent is contacting API
-    .then(weatherResults => {
-      //looking into weather results to map out new array of each day
-      const weatherSummaries = weatherResults.body.daily.data.map(day => {
-        return new Weather(day);
-      })
-      //sends weatherSummaries to search weather function
-      response.send(weatherSummaries);
+function searchWeather(request, response){
+  let query = request.query.data.id;
+  
+  let sql = `SELECT * FROM weathers WHERE location_id=$1`
+
+  let values = [query];
+
+  client.query(sql, values)
+    .then(result =>{
+      if(result.rowCount > 0){
+        response.send(result.rows);
+        console.log('from SQL 🎃')
+      }else{
+        const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
+        console.log('from API 🤮')
+        superagent.get(url) 
+          .then(weatherResults => {
+            if(!weatherResults.body.daily.data.length){ throw 'NO DATA'}
+            else{
+              const weatherSummaries = weatherResults.body.daily.data.map(day =>{
+                let summary = new Weather(day);
+                summary.id = query; 
+
+                let newSql = `INSERT INTO weathers (forecast, time, location_id) VALUES($1, $2, $3);`;
+                let newValues = Object.values(summary);
+                client.query(newSql, newValues);
+
+                return summary;
+              });
+
+              response.send(weatherSummaries);
+
+            }
+          })
+      }
     })
     .catch(error => handleError(error, response));
 }
