@@ -9,7 +9,7 @@ const superagent = require('superagent');
 //package dependencies
 const express = require('express');
 const cors = require('cors');
-const pg = require('pg');
+//const pg = require('pg');
 
 //app setup
 const PORT = process.env.PORT || 3000;
@@ -93,16 +93,18 @@ function Weather(day){
 function searchMeetup(request, response) {
   console.log('You have reached the searchMeetup function')
   //const url = `https://api.meetup.com/find/upcoming_events?photo-host=public&page=20&sig_id=275550877&lon=${request.query.data.longitude}&${request.query.data.latitude}&sig=${process.env.MEETUP_API_KEY}`
-  // const url = `https://api.meetup.com/2/events?key=${process.env.MEETUP_API_KEY}&group_urlname=ny-tech&sign=true`
-  const url = `https://api.meetup.com/2/events?key=${process.env.MEETUP_API_KEY}&group_urlname=ny-tech&sign=true`
-
-
+  //const url = `https://api.meetup.com/2/events?key=${process.env.MEETUP_API_KEY}&group_urlname=ny-tech&sign=true`
+  //const url = `https://api.meetup.com/2/cities?offset=0&format=json&lon=${location.longitude}&photo-host=public&page=20&radius=50&lat=${location.latitude}&order=size&desc=false&sig_id=276937229&sig=${process.env.MEETUP_API_KEY}`
+  //const url = `https://api.meetup.com/2/cities?offset=0&format=json&lon=35.0&photo-host=public&page=20&radius=50&lat=5.0&order=size&desc=false&sig_id=276937229&sig=${process.env.MEETUP_API_KEY}`
+  const url = `https://api.meetup.com/find/upcoming_events?photo-host=public&page=20&sig_id=275550877&lon=${request.query.data.longitude}&lat=${request.query.data.latitude}&key=${process.env.MEETUP_API_KEY}`
   return superagent.get(url)
     .then(meetupResults =>{
-      const meetupSummaries = meetupResults.body.results.map(daily => {
+      //console.log(' meetup results:', meetupResults.body.events)
+     // console.log('Request at 103:', request);
+      const meetupSummaries = meetupResults.body.events.map(daily => {
         return new Meetup(daily);
       })
-      response.send(meetupSummaries);
+     response.send(meetupSummaries);
     })
     .catch(error => handleError(error, response));
 }
