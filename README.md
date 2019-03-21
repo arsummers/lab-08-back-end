@@ -72,6 +72,16 @@ Estimate of time needed to complete: 45min
 Start time: 11:51
 Driver: Merry, Navigator: Aliya
 
+Finish time: got weather and maps done by 1240: pause clock: 
+
+Actual time needed to complete: 
+
+#Number and name of feature: Feature 3 - seql file
+Estimate of time needed to complete: 45min
+
+Start time: 12:47
+Driver: Merry, Navigator: Aliya
+
 Finish time: 
 
 Actual time needed to complete: 

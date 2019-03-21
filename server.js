@@ -99,22 +99,7 @@ function Location(query, location) {
 }
 
 //Refactoring weather to use array.maps. Callback function for the /weather path
-
-// function searchWeather(request, response) {
-//   //gets url for API key and feeds into superagent
-//   const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`
-//   return superagent.get(url)
-//   // asynchronous call that renders weather results while superagent is contacting API
-//     .then(weatherResults => {
-//       //looking into weather results to map out new array of each day
-//       const weatherSummaries = weatherResults.body.daily.data.map(day => {
-//         return new Weather(day);
-//       })
-//       //sends weatherSummaries to search weather function
-//       response.send(weatherSummaries);
-//     })
-//     .catch(error => handleError(error, response));
-// }
+//and SQL
 
 function searchWeather(request, response){
   let query = request.query.data.id;
@@ -123,34 +108,34 @@ function searchWeather(request, response){
   let values = [query];
 
   client.query(sql, values)
-  .then(result =>{
-    if(result.rowCount > 0){
-   response.send(result.rows);
-    }else{
-      const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
+    .then(result =>{
+      if(result.rowCount > 0){
+        response.send(result.rows);
+      }else{
+        const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
 
-      superagent.get(url) 
-      .then(weatherResults => {
-        if(!weatherResults.body.daily.data.length){ throw 'NO DATA'}
-        else{
-          const weatherSummaries = weatherResults.body.daily.data.map(day =>{
-            let summary = new Weather(day);
-            summary.id = query; 
+        superagent.get(url) 
+          .then(weatherResults => {
+            if(!weatherResults.body.daily.data.length){ throw 'NO DATA'}
+            else{
+              const weatherSummaries = weatherResults.body.daily.data.map(day =>{
+                let summary = new Weather(day);
+                summary.id = query; 
 
-            let newSql = `INSERT INTO weathers (forecast, time, location_id) VALUES($1, $2, $3);`;
-            let newValues = Object.values(summary);
-            client.query(newSql, newValues);
+                let newSql = `INSERT INTO weathers (forecast, time, location_id) VALUES($1, $2, $3);`;
+                let newValues = Object.values(summary);
+                client.query(newSql, newValues);
 
-            return summary;
-          });
+                return summary;
+              });
 
-          response.send(weatherSummaries);
+              response.send(weatherSummaries);
 
-        }
-      })
-    }
-  })
-  .catch(error => handleError(error, response));
+            }
+          })
+      }
+    })
+    .catch(error => handleError(error, response));
 }
 
 //constructor for weather. Turns the milliseconds from the original weather data into userfriendly output
