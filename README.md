@@ -65,3 +65,13 @@ Driver: Aliya, Navigator: Merry
 Finish time: 11:38
 
 Actual time needed to complete: 2:00
+
+#Number and name of feature: Feature 2 - adapt server JS to handle SEQL responses
+Estimate of time needed to complete: 45min
+
+Start time: 11:51
+Driver: Merry, Navigator: Aliya
+
+Finish time: 
+
+Actual time needed to complete: 
