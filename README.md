@@ -53,3 +53,15 @@ Driver: Aliya, Navigator: Jess
 Finish time: unfinished meetup API call at 1330
 
 Actual time needed to complete: 1 hour, 5 minutes
+
+
+#################### Lab 8 #############
+#Number and name of feature: Feature 1 - Finsih meetup API render
+Estimate of time needed to complete: 30 min
+
+Start time: 9:31
+Driver: Aliya, Navigator: Merry
+
+Finish time: 11:38
+
+Actual time needed to complete: 2:00

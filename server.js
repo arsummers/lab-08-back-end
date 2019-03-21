@@ -9,7 +9,7 @@ const superagent = require('superagent');
 //package dependencies
 const express = require('express');
 const cors = require('cors');
-const pg = require('pg');
+//const pg = require('pg');
 
 //app setup
 const PORT = process.env.PORT || 3000;
@@ -92,24 +92,24 @@ function Weather(day){
 //not fully working yet, but we think we're on the right track. Need to figure out what parameters to pass to the group_url to make it access the location
 function searchMeetup(request, response) {
   console.log('You have reached the searchMeetup function')
-  //const url = `https://api.meetup.com/find/upcoming_events?photo-host=public&page=20&sig_id=275550877&lon=${request.query.data.longitude}&${request.query.data.latitude}&sig=${process.env.MEETUP_API_KEY}`
-  // const url = `https://api.meetup.com/2/events?key=${process.env.MEETUP_API_KEY}&group_urlname=ny-tech&sign=true`
-  const url = `https://api.meetup.com/2/events?key=${process.env.MEETUP_API_KEY}&group_urlname=ny-tech&sign=true`
-
-
+  const url = `https://api.meetup.com/find/upcoming_events?&sign=true&photo-host=public&lon=${request.query.data.longitude}&page=20&lat=${request.query.data.latitude}&key=${process.env.MEETUP_API_KEY}`
   return superagent.get(url)
     .then(meetupResults =>{
-      const meetupSummaries = meetupResults.body.results.map(daily => {
-        return new Meetup(daily);
+      console.log('THIS IS THE NAME OF THE MEETUP', meetupResults.body.events[0].name)
+      const meetupSummaries = meetupResults.body.events.map(daily => {
+        let newMeetup = new Meetup(daily);
+        console.log('THIS IS A NEW MEEETUP', newMeetup)
+        return newMeetup;
       })
       response.send(meetupSummaries);
     })
     .catch(error => handleError(error, response));
 }
 
-function Meetup(link, name, creation_date, host){
-  this.link = link;
-  this.name = name;
-  this.creation_date = creation_date;
-  this.host = host;
+
+function Meetup(data){
+  this.link = data.link;
+  this.name = data.name;
+  this.creation_date = new Date(data.created).toString().slice(0, 15);
+  this.host = data.group.name;
 }
