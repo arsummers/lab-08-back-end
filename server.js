@@ -58,7 +58,7 @@ function searchToLatLong(request, response){
   client.query(sql, values)
     .then(result => {
       if (result.rowCount > 0){
-        console.log('LOCATION FROM SQL');
+        console.log('👹LOCATION FROM SQL');
         response.send(result.rows[0]);
 
       }else{
@@ -67,7 +67,7 @@ function searchToLatLong(request, response){
         superagent.get(url)
 
           .then(data =>{
-            console.log('LOCATION FROM API','⇣');
+            console.log('💩LOCATION FROM API');
 
             if(!data.body.results.length){throw 'NO DATA'}
 
@@ -105,6 +105,7 @@ function Location(query, location) {
 
 function searchWeather(request, response){
   let query = request.query.data.id;
+  
   let sql = `SELECT * FROM weathers WHERE location_id=$1`
 
   let values = [query];
@@ -113,9 +114,10 @@ function searchWeather(request, response){
     .then(result =>{
       if(result.rowCount > 0){
         response.send(result.rows);
+        console.log('from SQL 🎃')
       }else{
         const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
-
+        console.log('from API 🤮')
         superagent.get(url) 
           .then(weatherResults => {
             if(!weatherResults.body.daily.data.length){ throw 'NO DATA'}
